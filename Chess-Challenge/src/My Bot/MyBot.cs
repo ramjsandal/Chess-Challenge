@@ -3,44 +3,49 @@ using ChessChallenge.API;
 
 public class MyBot : IChessBot
 {
+/*
+right now bot doesn't consider white playing a good move, considers worst possible move
+*/
   public Move Think(Board board, Timer timer)
   {
     // Only works for black rn
     return GetBestMove(board, 100);
-
   }
 
   public Move GetBestMove(Board board, int depth)
   {
-    Move[] moves = board.GetLegalMoves();
+    Move[] blackMoves = board.GetLegalMoves();
     float bestMoveEval = 999;
     int bestMoveIndex = 0;
-    for (int i = 0; i < moves.Length; i++)
+    for (int i = 0; i < blackMoves.Length; i++)
     {
-      board.MakeMove(moves[i]);
-      Move[] moves2 = board.GetLegalMoves();
-      for (int j = 0; j < moves2.Length; j++)
+      board.MakeMove(blackMoves[i]);
+      Move[] whiteMoves = board.GetLegalMoves();
+      float bestWhiteMoveEval = -999;
+      int bestWhiteMoveIndex = 0;
+      for (int j = 0; j < whiteMoves.Length; j++)
       {
-        board.MakeMove(moves2[j]);
-        Move[] moves3 = board.GetLegalMoves();
-        for (int k = 0; k < moves3.Length; k++)
+        board.MakeMove(whiteMoves[j]);
+        if (Evaluate(board) > bestWhiteMoveEval)
         {
-          board.MakeMove(moves3[k]);
-          if (Evaluate(board) < bestMoveEval)
-          {
-            bestMoveEval = Evaluate(board);
-            bestMoveIndex = i;
-          }  
-          board.UndoMove(moves3[k]);
+          bestWhiteMoveEval = Evaluate(board);
+          bestWhiteMoveIndex = j;
         }
-        board.UndoMove(moves2[j]);
+        board.UndoMove(whiteMoves[j]);
       }
-      board.UndoMove(moves[i]);
-    } 
-    return moves[bestMoveIndex];
+
+      if (bestWhiteMoveEval < bestMoveEval)
+      {
+        bestMoveEval = bestWhiteMoveEval;
+        bestMoveIndex = i;
+      }
+
+      board.UndoMove(blackMoves[i]);
+    }
+
+    return blackMoves[bestMoveIndex];
   }
-  
-  
+
 
   public float Evaluate(Board board)
   {
@@ -58,7 +63,7 @@ public class MyBot : IChessBot
       }
     }
 
-    return white-black;
+    return white - black;
   }
 
   public float GetPieceVal(PieceType pt)
