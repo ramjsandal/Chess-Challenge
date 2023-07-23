@@ -49,6 +49,18 @@ right now bot doesn't consider white playing a good move, considers worst possib
 
   public float Evaluate(Board board)
   {
+    if (board.IsInCheckmate())
+    {
+      if (board.IsWhiteToMove)
+      {
+        return float.MinValue;  
+      }
+      else
+      {
+        return float.MaxValue;
+      }
+      
+    }
     PieceList[] pieces = board.GetAllPieceLists();
     float white = 0, black = 0;
     for (int i = 0; i < pieces.Length; i++)
