@@ -13,18 +13,30 @@ public class MyBot : IChessBot
   public Move GetBestMove(Board board, int depth)
   {
     Move[] moves = board.GetLegalMoves();
-    float bestMoveEval = 0;
+    float bestMoveEval = 999;
     int bestMoveIndex = 0;
     for (int i = 0; i < moves.Length; i++)
     {
       board.MakeMove(moves[i]);
-      if (Evaluate(board) < bestMoveEval)
+      Move[] moves2 = board.GetLegalMoves();
+      for (int j = 0; j < moves2.Length; j++)
       {
-        bestMoveIndex = i;
-        bestMoveEval = Evaluate(board);
+        board.MakeMove(moves2[j]);
+        Move[] moves3 = board.GetLegalMoves();
+        for (int k = 0; k < moves3.Length; k++)
+        {
+          board.MakeMove(moves3[k]);
+          if (Evaluate(board) < bestMoveEval)
+          {
+            bestMoveEval = Evaluate(board);
+            bestMoveIndex = i;
+          }  
+          board.UndoMove(moves3[k]);
+        }
+        board.UndoMove(moves2[j]);
       }
       board.UndoMove(moves[i]);
-    }
+    } 
     return moves[bestMoveIndex];
   }
   
